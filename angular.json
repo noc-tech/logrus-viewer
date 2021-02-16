@@ -1,0 +1,150 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "logrus-viewer": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss",
+          "skipTests": true
+        },
+        "@schematics/angular:class": {
+          "skipTests": true
+        },
+        "@schematics/angular:directive": {
+          "skipTests": true
+        },
+        "@schematics/angular:guard": {
+          "skipTests": true
+        },
+        "@schematics/angular:interceptor": {
+          "skipTests": true
+        },
+        "@schematics/angular:module": {
+          "skipTests": true
+        },
+        "@schematics/angular:pipe": {
+          "skipTests": true
+        },
+        "@schematics/angular:service": {
+          "skipTests": true
+        }
+      },
+      "root": "ui/",
+      "sourceRoot": "ui/src",
+      "prefix": "lv",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/logrus-viewer",
+            "index": "ui/src/index.html",
+            "main": "ui/src/main.ts",
+            "polyfills": "ui/src/polyfills.ts",
+            "tsConfig": "ui/tsconfig.app.json",
+            "aot": true,
+            "assets": [
+              "ui/src/favicon.ico",
+              "ui/src/assets"
+            ],
+            "styles": [
+              "ui/src/styles.scss"
+            ],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "ui/src/environments/environment.ts",
+                  "with": "ui/src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "logrus-viewer:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "logrus-viewer:build:production"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "logrus-viewer:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "ui/src/test.ts",
+            "polyfills": "ui/src/polyfills.ts",
+            "tsConfig": "ui/tsconfig.spec.json",
+            "karmaConfig": "karma.conf.js",
+            "assets": [
+              "ui/src/favicon.ico",
+              "ui/src/assets"
+            ],
+            "styles": [
+              "ui/src/styles.scss"
+            ],
+            "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "ui/tsconfig.app.json",
+              "ui/tsconfig.spec.json",
+              "ui-e2e/tsconfig.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        },
+        "ui-e2e": {
+          "builder": "@angular-devkit/build-angular:protractor",
+          "options": {
+            "protractorConfig": "ui-e2e/protractor.conf.js",
+            "devServerTarget": "logrus-viewer:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "logrus-viewer:serve:production"
+            }
+          }
+        }
+      }
+    }},
+  "defaultProject": "logrus-viewer"
+}

@@ -1,0 +1,82 @@
+<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
+  <h5 class="my-0 mr-md-auto font-weight-normal">Log Viewer</h5>
+</div>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-sm-2">
+      <div class="card sticky-top">
+        <div class="card-header">Filter</div>
+        <div class="card-body">
+          <form [formGroup]="filterForm" novalidate>
+            <div class="mb-3">
+              <label for="level" i18n>Log Level</label>
+              <ng-select [multiple]="true" formControlName="level" placeholder="Any">
+                <ng-option value="panic">panic</ng-option>
+                <ng-option value="fatal">fatal</ng-option>
+                <ng-option value="error">error</ng-option>
+                <ng-option value="warning">warning</ng-option>
+                <ng-option value="info">info</ng-option>
+                <ng-option value="debug">debug</ng-option>
+                <ng-option value="trace">trace</ng-option>
+              </ng-select>
+            </div>
+            <div class="mb-3">
+              <label for="service" i18n>Service</label>
+              <ng-select [multiple]="true" formControlName="service" placeholder="Any">
+                <ng-option *ngFor="let service of services" [value]="service">{{service}}</ng-option>
+              </ng-select>
+            </div>
+            <div class="mb-3">
+              <label for="id" i18n>ID</label>
+              <ng-select formControlName="id" placeholder="Any">
+                <ng-option *ngFor="let id of ids" [value]="id">{{id}}</ng-option>
+              </ng-select>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm">
+      <div class="table-container mb-3">
+        <table class="table table-striped table-bordered">
+          <thead>
+            <th scope="col">Level</th>
+            <th scope="col">Time</th>
+            <th scope="col">Service</th>
+            <th scope="col">ID</th>
+            <th scope="col">Message</th>
+            <th scope="col">Data</th>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of filteredLogs"
+              [class.table-danger]="log.level==='panic'||log.level==='fatal'||log.level==='error'"
+              [class.table-warning]="log.level==='warning'" [class.table-info]="log.level==='info'"
+              [class.table-light]="log.level==='debug'" #item>
+              <td>
+                <span class="badge" [class.bg-danger]="log.level==='panic'||log.level==='fatal'||log.level==='error'"
+                  [class.bg-warning]="log.level==='warning'" [class.bg-info]="log.level==='info'"
+                  [class.bg-light]="log.level==='debug'"
+                  [class.text-dark]="log.level==='warning'||log.level==='info'||log.level==='debug'">{{ log.level }}</span>
+              </td>
+              <td nowrap="nowrap">{{ log.time | date:'HH:mm:ss:SSS' }}</td>
+              <td>{{ log.data?.service }}</td>
+              <td>{{ log.data?.id }}</td>
+              <td>{{ log.message }}</td>
+              <td>
+                <a class="text-primary" (click)="toggleData(log)">
+                  <ng-container *ngIf="log.showData">hide</ng-container>
+                  <ng-container *ngIf="!log.showData">show</ng-container>
+                </a>
+                <ng-container *ngIf="log.showData">
+                  <code class="mt-2 d-block">
+                    <pre class="m-0">{{ log.data | json }}</pre></code>
+                </ng-container>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
