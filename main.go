@@ -1,14 +1,11 @@
-// go:generate go-bindata -prefix "dist/logrus-viewer" dist/logrus-viewer/...
 package main
 
 import (
-	"bytes"
+	"embed"
 	"encoding/json"
-	"io"
+	"io/fs"
 	"log"
 	"net/http"
-	"path/filepath"
-	"strings"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -20,38 +17,21 @@ func main() {
 	mux.HandleFunc("/log/post", createLog)
 	mux.HandleFunc("/log/clear", clearLogs)
 	mux.HandleFunc("/log", getLogs)
-	mux.HandleFunc("/", assetsHandler)
+	mux.Handle("/", http.FileServer(getFileSystem()))
 	if err := http.ListenAndServe(":1299", mux); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func assetsHandler(w http.ResponseWriter, r *http.Request) {
-	var file = strings.TrimLeft(filepath.Base(r.URL.Path), "/")
-	if file == "" {
-		file = "index.html"
+//go:embed dist/logrus-viewer
+var embededFiles embed.FS
+
+func getFileSystem() http.FileSystem {
+	fsys, err := fs.Sub(embededFiles, "dist/logrus-viewer")
+	if err != nil {
+		log.Fatal(err)
 	}
-	if bs, err := Asset(file); err != nil {
-		w.WriteHeader(http.StatusNotFound)
-	} else {
-		contentType := "text/plain"
-		if strings.HasSuffix(file, ".css") {
-			contentType = "text/css"
-		} else if strings.HasSuffix(file, ".html") {
-			contentType = "text/html"
-		} else if strings.HasSuffix(file, ".js") {
-			contentType = "application/javascript"
-		} else if strings.HasSuffix(file, ".png") {
-			contentType = "image/png"
-		} else if strings.HasSuffix(file, ".jpg") {
-			contentType = "image/jpg"
-		} else if strings.HasSuffix(file, ".svg") {
-			contentType = "image/svg+xml"
-		}
-		w.Header().Add("Content-Type", contentType)
-		var reader = bytes.NewBuffer(bs)
-		io.Copy(w, reader)
-	}
+	return http.FS(fsys)
 }
 
 var logs = logDB{}
