@@ -2,7 +2,10 @@ import { AfterViewInit, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { HostListener } from '@angular/core';
 import { Component } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
-import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
+import { webSocket } from 'rxjs/webSocket';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { tap, retryWhen, delay } from 'rxjs/operators';
 
 @Component({
   selector: 'lv-root',
@@ -11,7 +14,6 @@ import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 })
 export class AppComponent implements OnInit, AfterViewInit {
 
-  myWebSocket: WebSocketSubject<any> = webSocket('ws://localhost:1299/log');
   logs = [];
   filteredLogs = [];
 
@@ -28,34 +30,67 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   @ViewChildren('item') itemElements: QueryList<any>;
 
+  constructor(private http: HttpClient) { }
+
   // tslint:disable-next-line: typedef
   ngOnInit() {
-    this.myWebSocket.asObservable().subscribe(d => {
-      if (d === null) {
-        return;
-      }
-      if (d.length) {
-        this.logs = d;
-        this.logs.forEach(element => {
-          this.buildOptions(element);
-        });
-      } else {
-        this.logs.push(d);
-        this.buildOptions(d);
-      }
-      this.filterLogs(this.filterForm.value);
-    }, error => {
-      console.log(error);
-    },
-      () => console.log('complete'));
-
+    this.createWebSocket('ws://localhost:1299/log')
+      .pipe(
+        retryWhen(errors =>
+          errors.pipe(
+            tap(err => {
+              console.error('Got error', err);
+            }),
+            delay(1000)
+          )
+        )
+      )
+      .subscribe((data: any) => {
+        if (data === null) {
+          return;
+        }
+        if (data.length) {
+          this.logs = data;
+          this.logs.forEach(element => {
+            this.buildOptions(element);
+          });
+        } else {
+          this.logs.push(data);
+          this.buildOptions(data);
+        }
+        this.filterLogs(this.filterForm.value);
+      }, err => console.error(err));
     this.filterForm.valueChanges.subscribe(data => this.filterLogs(data));
+  }
+
+  // tslint:disable-next-line: typedef
+  createWebSocket(uri) {
+    return new Observable(observer => {
+      try {
+        const subject = webSocket(uri);
+
+        const subscription = subject.asObservable()
+          .subscribe(data =>
+            observer.next(data),
+            error => observer.error(error),
+            () => observer.complete());
+
+        return () => {
+          if (!subscription.closed) {
+            subscription.unsubscribe();
+          }
+        };
+      } catch (error) {
+        observer.error(error);
+      }
+    });
   }
 
   // tslint:disable-next-line: typedef
   ngAfterViewInit() {
     this.itemElements.changes.subscribe(_ => this.onItemElementsChanged());
   }
+
   // tslint:disable-next-line: typedef
   buildOptions(log: any) {
     if (log.data.id) {
@@ -73,6 +108,15 @@ export class AppComponent implements OnInit, AfterViewInit {
   // tslint:disable-next-line: typedef
   toggleData(log: any) {
     log.showData = !log.showData;
+  }
+
+  // tslint:disable-next-line: typedef
+  clearLogs() {
+    return this.http.get('/log/clear').subscribe(response => {
+      this.logs = [];
+      this.filteredLogs = [];
+    }, error => console.log(error),
+    );
   }
 
   // tslint:disable-next-line: typedef

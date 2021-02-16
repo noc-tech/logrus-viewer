@@ -18,6 +18,7 @@ import (
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/log/post", createLog)
+	mux.HandleFunc("/log/clear", clearLogs)
 	mux.HandleFunc("/log", getLogs)
 	mux.HandleFunc("/", assetsHandler)
 	if err := http.ListenAndServe(":1299", mux); err != nil {
@@ -65,6 +66,12 @@ func createLog(w http.ResponseWriter, r *http.Request) {
 	}
 	logChan <- &p
 	logs.Add(&p)
+	w.WriteHeader(200)
+	return
+}
+
+func clearLogs(w http.ResponseWriter, r *http.Request) {
+	logs = logDB{}
 	w.WriteHeader(200)
 	return
 }
