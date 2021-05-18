@@ -44,7 +44,6 @@
             "main": "ui/src/main.ts",
             "polyfills": "ui/src/polyfills.ts",
             "tsConfig": "ui/tsconfig.app.json",
-            "aot": true,
             "assets": [
               "ui/src/favicon.ico",
               "ui/src/assets"
@@ -52,7 +51,13 @@
             "styles": [
               "ui/src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "vendorChunk": true,
+            "extractLicenses": false,
+            "buildOptimizer": false,
+            "sourceMap": true,
+            "optimization": false,
+            "namedChunks": true
           },
           "configurations": {
             "production": {
@@ -65,7 +70,6 @@
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "extractLicenses": true,
               "vendorChunk": false,
