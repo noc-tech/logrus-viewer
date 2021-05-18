@@ -1,3 +1,26 @@
 a {
   cursor: pointer;
 }
+
+.item {
+  .level {
+    width: 60px;
+  }
+
+  .time {
+    width: 100px;
+  }
+
+  .service {
+    width: 150px;
+  }
+
+  .id {
+    width: 250px;
+  }
+
+  .message {
+    flex: 1;
+  }
+
+}

@@ -1,4 +1,4 @@
-import { AfterViewInit, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { AfterViewInit, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { HostListener } from '@angular/core';
 import { Component } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
@@ -6,6 +6,7 @@ import { webSocket } from 'rxjs/webSocket';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap, retryWhen, delay } from 'rxjs/operators';
+import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 
 @Component({
   selector: 'lv-root',
@@ -27,6 +28,9 @@ export class AppComponent implements OnInit, AfterViewInit {
   services = [];
 
   private isNearBottom = true;
+
+  @ViewChild('virtualScroll', { static: true })
+  public virtualScrollViewport: CdkVirtualScrollViewport;
 
   @ViewChildren('item') itemElements: QueryList<any>;
 
@@ -142,10 +146,14 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   private scrollToBottom(): void {
-    window.scroll({
-      top: document.body.scrollHeight,
-      left: 0,
-      behavior: 'smooth'
+    setTimeout(() => {
+      this.virtualScrollViewport.scrollToIndex(
+        this.filteredLogs.length - 1
+      );
+      setTimeout(() => {
+        const items = document.getElementsByClassName('item');
+        items[items.length - 1].scrollIntoView();
+      }, 10);
     });
   }
 
