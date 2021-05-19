@@ -38,7 +38,7 @@
 </div>
 
 <div class="d-flex flex-fill p-3">
-  <cdk-virtual-scroll-viewport #virtualScroll itemSize="50" style="height: 100%;" class="w-100 viewport">
+  <cdk-virtual-scroll-viewport #virtualScroll itemSize="50" style="height: 100%;" class="w-100 viewport" (scroll)="isUserNearBottom()">
     <div class="list-group">
       <div class="list-group-item list-group-item-action">
         <div class="d-flex item">
@@ -49,7 +49,7 @@
           <div class="message">Message</div>
         </div>
       </div>
-      <ng-container *cdkVirtualFor="let log of filteredLogs">
+      <ng-container *cdkVirtualFor="let log of filteredLogs" #item>
         <a (click)="toggleData(log)" class="list-group-item list-group-item-action"
           [class.table-danger]="log.level==='panic'||log.level==='fatal'||log.level==='error'"
           [class.list-group-item-warning]="log.level==='warning'" [class.list-group-item-info]="log.level==='info'"

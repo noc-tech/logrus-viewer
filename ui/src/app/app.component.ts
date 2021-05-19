@@ -1,5 +1,4 @@
 import { AfterViewInit, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { HostListener } from '@angular/core';
 import { Component } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { webSocket } from 'rxjs/webSocket';
@@ -157,15 +156,13 @@ export class AppComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private isUserNearBottom(): boolean {
+  // tslint:disable-next-line: typedef
+  public isUserNearBottom() {
     const threshold = 150;
-    const position = window.scrollY + window.innerHeight;
-    const height = document.body.scrollHeight;
-    return position > height - threshold;
+    const cont = document.getElementsByClassName('cdk-virtual-scroll-viewport');
+    const element = cont[0];
+    const p = (element.scrollTop + element.clientHeight) >= (element.scrollHeight - threshold);
+    this.isNearBottom = p;
   }
 
-  @HostListener('window:scroll', ['$event'])
-  scrolled(event: any): void {
-    this.isNearBottom = this.isUserNearBottom();
-  }
 }
